@@ -1,0 +1,5 @@
+- insert:
+    - id: local-solution-first
+      # Must be the published package name — the loader imports this specifier.
+      # Quoted because YAML reserves a leading '@' in plain scalars.
+      name: "@shenhe3939-debug/local-solution-first"

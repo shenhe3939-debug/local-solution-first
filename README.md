@@ -4,8 +4,9 @@
 **先在本机检索有没有现成的、可复用的东西**，并且用证据说话 —— 证据不足就不强行复用，
 而是明确写出"为什么这次不该复用"。
 
-> 它是**行为规程**，不是工具：不新增任何权限、不注册任何 MCP 工具、不附带脚本，
-> 只约束 Agent 的分析顺序和报告结构。
+> 技能本身是**行为规程**，不是工具：不新增任何权限、不注册任何 MCP 工具，
+> 只约束 Agent 的分析顺序和报告结构。仓库另外带一层很薄的插件包装，
+> 唯一作用是把这个技能注册进 DSH（见下方「安装」）。
 
 ---
 
@@ -23,6 +24,21 @@ Agent 最常见的浪费是"重新发明已经有轮子的车"：本机已经装
 挑选依赖、排查本机已有工具、以及"复用它还是自己写"的这类抉择。
 
 ## 安装
+
+### 方式 A：作为 DSH 插件安装
+
+本仓库同时是一个 DSH 组合包（bundle）：在桌面端 Web 侧边栏的**插件**页安装并启用它，
+也可以让 Agent 用 `plugin_manager` 工具安装（该操作需要 `danger-full-access` 或逐次批准）。
+组合包需要出现在 profile 的依赖中、并在 `dsh.profile.bundles` 里被选中才会生效；
+改配置后启用 HMR 的 profile 立即生效，否则等重启。
+
+启用后，`cordis.patch.yml` 会把 `lib/index.mjs` 挂进组合，由它在 `ctx.skills.register`
+上注册本技能（`source: bundled`，资源基目录指向包根，所以 `references/`、`tests/`
+照常可被引用）。技能正文由 `scripts/build-skill-content.mjs` 从 `SKILL.md` 生成到
+`lib/skill-content.mjs`，与从目录发现的同名技能**逐字节相同**（都是去掉 frontmatter
+再 trim 的正文）——改了 `SKILL.md` 记得重跑一次生成脚本。包版本号跟随它包装的技能版本。
+
+### 方式 B：作为普通 skill 目录
 
 DSH 的 Skill 发现规则（源码与实测确认，DSH 0.2.0-rc.2）：
 
@@ -52,6 +68,11 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 | 路径 | 作用 |
 | --- | --- |
 | `SKILL.md` | Skill 本体：触发条件、10 条硬规则、工作流、报告结构、DSH 环境事实 |
+| `package.json` | DSH 组合包清单：`dsh.bundle.patch` 指向 `cordis.patch.yml` |
+| `cordis.patch.yml` | 组合包补丁：把插件挂进组合（`insert` 一行） |
+| `lib/index.mjs` | 插件入口：在 `ctx.skills.register` 上注册本技能 |
+| `lib/skill-content.mjs` | 由 `SKILL.md` 生成的技能正文（构建产物，勿手改） |
+| `scripts/build-skill-content.mjs` | 生成上一行：拆 frontmatter、trim 正文、写入 SHA-256 |
 | `references/compatibility-checklist.md` | 复用前的能力/兼容性核对清单（含 provider/plugin skill 根 250 档） |
 | `references/decision-matrix.md` | "复用 / 部分复用 / 不复用"的判定矩阵 |
 | `references/validator-design.md` | 验证器设计：怎样算查到了、怎样算没查 |

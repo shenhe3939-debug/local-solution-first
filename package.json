@@ -1,0 +1,47 @@
+{
+  "name": "@shenhe3939-debug/local-solution-first",
+  "version": "0.1.6",
+  "description": "Ships the local-solution-first agent skill as a DSH bundle: search for an existing local solution and verify it with evidence before implementing a duplicate.",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.mjs",
+  "exports": {
+    ".": {
+      "default": "./lib/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts",
+    "SKILL.md",
+    "references",
+    "cordis.patch.yml",
+    "LICENSE",
+    "README.md",
+    "README-DSH.md",
+    "CHANGELOG.md",
+    "tests",
+    "dist"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "agent-skill",
+    "skill",
+    "reuse",
+    "local-solution-first"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
