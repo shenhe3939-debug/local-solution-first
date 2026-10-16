@@ -1,0 +1,78 @@
+# local-solution-first
+
+一个给 **DeepSeek Harness (DSH)** 用的 Skill：在动手实现、移植、选依赖、排查工具之前，
+**先在本机检索有没有现成的、可复用的东西**，并且用证据说话 —— 证据不足就不强行复用，
+而是明确写出"为什么这次不该复用"。
+
+> 它是**行为规程**，不是工具：不新增任何权限、不注册任何 MCP 工具、不附带脚本，
+> 只约束 Agent 的分析顺序和报告结构。
+
+---
+
+## 它解决什么问题
+
+Agent 最常见的浪费是"重新发明已经有轮子的车"：本机已经装着同类插件、Skill、脚本、
+依赖或源码，Agent 却直接开始写新实现。这个 Skill 要求把顺序倒过来：
+
+1. **先定检索范围**，按分层从"最可能被复用"的位置往外搜；
+2. **再逐个候选取证**，用可核对的事实（路径、版本、能力、代价）而不是印象；
+3. **给出建议**，包括"复用 / 部分复用 / 不复用 / 需要更多信息"四种明确结论；
+4. **写清安全与验证**，以及这次结论的**证据边界**（哪些地方没查、为什么没查）。
+
+触发场景：评估一个仓库能不能直接用、把外部项目移植进来、实现新功能前选方案、
+挑选依赖、排查本机已有工具、以及"复用它还是自己写"的这类抉择。
+
+## 安装
+
+DSH 的 Skill 发现规则（源码与实测确认，DSH 0.2.0-rc.2）：
+
+- 只发现**一层**：`<root>/<skill-name>/SKILL.md`，`**/SKILL.md` 这种嵌套路径**不会**被发现；
+- 多个根目录**优先级数字小的赢**：
+  `项目 .dsh/skills` 100 < `项目 .agents/skills` 200 < `运行时 provider` 250 <
+  `自定义目录` 300 < `用户 .dsh/skills` 400 < `用户 .agents/skills` 500 < `内置` 600。
+
+所以**同名副本只有优先级高的那个生效**，用户级副本会被项目级副本遮蔽。
+
+克隆到任一 skill 根目录下、目录名保持 `local-solution-first` 即可：
+
+```powershell
+git clone https://github.com/shenhe3939-debug/local-solution-first.git `
+  "$env:USERPROFILE\.dsh\skills\local-solution-first"
+```
+
+也可以直接用随仓库附带的冻结发行包 `dist/local-solution-first-dsh-v0.1.6.zip`
+（解压后是 `local-solution-first/` 目录，放进任一 skill 根目录即可）。
+
+## 仓库内容
+
+| 路径 | 作用 |
+| --- | --- |
+| `SKILL.md` | Skill 本体：触发条件、10 条硬规则、工作流、报告结构、DSH 环境事实 |
+| `references/compatibility-checklist.md` | 复用前的能力/兼容性核对清单（含 provider/plugin skill 根 250 档） |
+| `references/decision-matrix.md` | "复用 / 部分复用 / 不复用"的判定矩阵 |
+| `references/validator-design.md` | 验证器设计：怎样算查到了、怎样算没查 |
+| `tests/regression-protocol.md` | 回归协议：探针格式、输出卫生、硬性阳性对照的要求 |
+| `tests/regression-cases.md` | 13 个用例 LS-01 … LS-13 |
+| `tests/regression-run-*.md` | 历次回归记录（run #1 … run #9，2026-10-16） |
+| `CHANGELOG.md` | 版本沿革与冻结策略 |
+| `dist/local-solution-first-dsh-v0.1.6.zip` | v0.1.6 冻结发行包 |
+
+## 版本与验证状态（as-of 记录）
+
+- **当前冻结版本：v0.1.6（2026-10-17）**，`SKILL.md` 自 v0.1.4 起逐字节未变
+  （SHA-256 `F6E1E40495998A07DF0F32A6EDC0B81AB07CABEB6148D974A8A456380D1A915D`）。
+- **发行包指纹**：`dist/local-solution-first-dsh-v0.1.6.zip`，159,602 字节，
+  SHA-256 `1360F7DFC5C014B46D170CDDD4D922D543CB0A90D64101423E4CFE272CC140E6`。
+  本仓库根目录下的包文件就是该 zip 解压出来的逐字节内容。
+- **最终回归 run #10（2026-10-17）**：behavioral **13/13 PASS**（mandatory subset 7/7）；
+  run protocol **COMPLIANT**（1 处 deviation，D-T1 未复现）；run-level release gate **PASSED**。
+- **冻结策略**：只有三种情形开 v0.1.7 —— DSH 升级、实际观察到 Skill 行为错误、
+  或明确新增功能。
+
+> 本项目的记录纪律：状态一律写成**带日期的 as-of 证据**，不用现在时断言，
+> 也不回改历史条目；新条目覆盖旧条目。`tests/` 里的历史记录保持原样。
+
+## 许可证
+
+**尚未声明**（默认保留所有权利）。如需开源请作者补一份 LICENSE；
+本机作者另一个仓库 `dsh-wiztree` 用的是 MIT。
