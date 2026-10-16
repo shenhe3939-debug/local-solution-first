@@ -11,7 +11,7 @@
 // exact three-line shape) so the script stays dependency-free. The DSH-side
 // check that the patch parses with the host's own YAML schema lives in the
 // development notes, not in this published script.
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -33,7 +33,7 @@ const sha256 = (file) => createHash("sha256").update(readFileSync(file)).digest(
 const find = (name, max = 4) => {
   const out = [];
   const walk = (dir) => {
-    for (const entry of readFileSync(dir, { withFileTypes: true })) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (out.length >= max) return;
       const p = join(dir, entry.name);
       if (entry.isDirectory()) walk(p);
