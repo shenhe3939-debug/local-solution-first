@@ -35,7 +35,9 @@ dsh plugin add github:shenhe3939-debug/local-solution-first
 
 - 或在桌面端 Web 侧边栏的**插件**页安装并启用它；
 - 或让 Agent 用 `plugin_manager` 工具安装（该操作需要 `danger-full-access` 或逐次批准）。
-组合包需要出现在 profile 的依赖中、并在 `dsh.profile.bundles` 里被选中才会生效；
+组合包在 profile 依赖里的名字就是 `@shenhe3939-debug/local-solution-first`：所有 bundle 都按
+**包名**记录在 `dsh.profile.bundles` 里，`cordis.patch.yml` 中 `insert` 的 `name` 必须与它一致
+才会被装载（该字段是宿主 import 的模块指示符，不能写成相对路径）；
 改配置后启用 HMR 的 profile 立即生效，否则等重启。
 
 启用后，`cordis.patch.yml` 会把 `lib/index.mjs` 挂进组合，由它在 `ctx.skills.register`
@@ -84,7 +86,7 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 | `references/validator-design.md` | 验证器设计：怎样算查到了、怎样算没查 |
 | `tests/regression-protocol.md` | 回归协议：探针格式、输出卫生、硬性阳性对照的要求 |
 | `tests/regression-cases.md` | 13 个用例 LS-01 … LS-13 |
-| `tests/regression-run-*.md` | 历次回归记录（run #1 … run #9，2026-10-16） |
+| `tests/regression-run-*.md` | 历次回归记录（run #1 … run #9，另有一次 priority-probe，均 2026-10-16） |
 | `CHANGELOG.md` | 版本沿革与冻结策略 |
 | `LICENSE` | MIT 许可证 |
 | `dist/local-solution-first-dsh-v0.1.6.zip` | v0.1.6 冻结发行包 |
@@ -98,11 +100,24 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
   本仓库根目录下的包文件就是该 zip 解压出来的逐字节内容。
 - **最终回归 run #10（2026-10-17）**：behavioral **13/13 PASS**（mandatory subset 7/7）；
   run protocol **COMPLIANT**（1 处 deviation，D-T1 未复现）；run-level release gate **PASSED**。
+  该记录产生于安装期、留在本地安装目录，**不在本冻结包内**（包内保留到 run #9）。
 - **冻结策略**：只有三种情形开 v0.1.7 —— DSH 升级、实际观察到 Skill 行为错误、
   或明确新增功能。
 
 > 本项目的记录纪律：状态一律写成**带日期的 as-of 证据**，不用现在时断言，
 > 也不回改历史条目；新条目覆盖旧条目。`tests/` 里的历史记录保持原样。
+
+### 仓库侧的字节一致性与打包自检
+
+- **`.gitattributes` 固定 LF**：Git for Windows 默认 `core.autocrlf=true`。没有这条规则时，
+  clone 出来的 `SKILL.md` 会被改写成 CRLF（12,971 B，SHA-256 `85add11f…`），与冻结指纹不符；
+  现在 `* text=auto eol=lf`（`*.zip` 视作二进制），任何平台的 checkout 都与冻结包逐字节相同。
+- **打包自检（全新 clone 上执行，26/26 通过）**：`SKILL.md` 与 `dist/*.zip` 命中冻结指纹；
+  `package.json` 声明 `dsh.bundle.patch` 且该文件存在、能用宿主自己的 YAML schema 解析、
+  顶层是映射数组、`insert.name` 等于包名；`files[]` 里每个路径都存在；`lib/index.mjs`
+  注册且只注册一个技能（名字合法、`source: bundled`、正文与 `SKILL.md` 去掉 frontmatter 后
+  逐字节相同、资源基目录可解析），且没有技能注册表时只是空操作、不抛错。
+- **构建可复现**：在 clone 里重跑 `node scripts/build-skill-content.mjs`，`git status` 干净。
 
 ## 许可证
 
