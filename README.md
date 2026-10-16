@@ -27,8 +27,14 @@ Agent 最常见的浪费是"重新发明已经有轮子的车"：本机已经装
 
 ### 方式 A：作为 DSH 插件安装
 
-本仓库同时是一个 DSH 组合包（bundle）：在桌面端 Web 侧边栏的**插件**页安装并启用它，
-也可以让 Agent 用 `plugin_manager` 工具安装（该操作需要 `danger-full-access` 或逐次批准）。
+本仓库同时是一个 DSH 组合包（bundle）。三种装法任选：
+
+```powershell
+dsh plugin add github:shenhe3939-debug/local-solution-first
+```
+
+- 或在桌面端 Web 侧边栏的**插件**页安装并启用它；
+- 或让 Agent 用 `plugin_manager` 工具安装（该操作需要 `danger-full-access` 或逐次批准）。
 组合包需要出现在 profile 的依赖中、并在 `dsh.profile.bundles` 里被选中才会生效；
 改配置后启用 HMR 的 profile 立即生效，否则等重启。
 
