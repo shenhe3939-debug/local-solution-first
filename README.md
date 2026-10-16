@@ -40,6 +40,13 @@ dsh plugin add github:shenhe3939-debug/local-solution-first
 才会被装载（该字段是宿主 import 的模块指示符，不能写成相对路径）；
 改配置后启用 HMR 的 profile 立即生效，否则等重启。
 
+> **这条结论的强度边界（as-of 2026-10-17）**：装载链路里除「真机 `dsh plugin add`」以外的
+> 每一环都在 DSH 0.2.0-rc.2 上实测过（读宿主源码 + 真实注册表装载 + 指示符解析，见下方
+> 「打包自检」）；但**没有**在一台真实 DSH profile 上跑过 `dsh plugin add` 并看它装载生效 ——
+> 记录这些证据的机器以 app.asar 便携形态运行 DSH，本机隔离沙箱工具直接拒绝
+> （`no DeepSeek Harness desktop installation found`）。所以此处「可安装」=
+> **契约级 + 运行时级已证，安装器端到端未证**。
+
 启用后，`cordis.patch.yml` 会把 `lib/index.mjs` 挂进组合，由它在 `ctx.skills.register`
 上注册本技能（`source: bundled`，资源基目录指向包根，所以 `references/`、`tests/`
 照常可被引用）。技能正文由 `scripts/build-skill-content.mjs` 从 `SKILL.md` 生成到
@@ -122,6 +129,13 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
   挂到真实 cordis 组合上，再按 bundle 的装载方式挂本插件 —— **14/14 通过**：技能出现在宿主目录、
   按名可加载、正文与 `SKILL.md` 正文一致、`provider: runtime`、渲染出
   `<skill_content name="local-solution-first">`，同名重复注册只是空操作、不会顶掉已生效的那个。
+- **装载指示符解析实测（2026-10-17）**：按宿主的解析算法（`packageDirFromAnchor`）在 profile 形状的
+  锚点上验证 —— `createRequire("<profile>/package.json").resolve("@shenhe3939-debug/local-solution-first")`
+  落到 `lib/index.mjs`；`node_modules/@shenhe3939-debug/local-solution-first/package.json` 的 `name`
+  与 `cordis.patch.yml` 里 `insert.name` 一致，`dsh.bundle.patch` 指向的文件存在；
+  `lib/` 内**没有非 `node:` 的裸导入**，因此模块不依赖宿主的 import map 就能加载
+  （对照：本机真实 profile 里已安装且在用的 `@wxg-prc-cpg/browser-skill-dsh-plugin` 需要
+  `@deepseek-ai/dsh-tools` 等宿主包，脱离 DSH 进程单独 import 会 `ERR_MODULE_NOT_FOUND`）。
 - **构建可复现**：在 clone 里重跑 `node scripts/build-skill-content.mjs`，`git status` 干净。
 
 ## 许可证
