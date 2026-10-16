@@ -81,6 +81,7 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 | `lib/index.mjs` | 插件入口：在 `ctx.skills.register` 上注册本技能 |
 | `lib/skill-content.mjs` | 由 `SKILL.md` 生成的技能正文（构建产物，勿手改） |
 | `scripts/build-skill-content.mjs` | 生成上一行：拆 frontmatter、trim 正文、写入 SHA-256 |
+| `scripts/verify-package.mjs` | 打包自检：在 clone 里核对冻结指纹、bundle 清单、补丁形状、注册载荷与资源可解析性（无外部依赖） |
 | `references/compatibility-checklist.md` | 复用前的能力/兼容性核对清单（含 provider/plugin skill 根 250 档） |
 | `references/decision-matrix.md` | "复用 / 部分复用 / 不复用"的判定矩阵 |
 | `references/validator-design.md` | 验证器设计：怎样算查到了、怎样算没查 |
@@ -112,11 +113,15 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 - **`.gitattributes` 固定 LF**：Git for Windows 默认 `core.autocrlf=true`。没有这条规则时，
   clone 出来的 `SKILL.md` 会被改写成 CRLF（12,971 B，SHA-256 `85add11f…`），与冻结指纹不符；
   现在 `* text=auto eol=lf`（`*.zip` 视作二进制），任何平台的 checkout 都与冻结包逐字节相同。
-- **打包自检（全新 clone 上执行，26/26 通过）**：`SKILL.md` 与 `dist/*.zip` 命中冻结指纹；
-  `package.json` 声明 `dsh.bundle.patch` 且该文件存在、能用宿主自己的 YAML schema 解析、
-  顶层是映射数组、`insert.name` 等于包名；`files[]` 里每个路径都存在；`lib/index.mjs`
-  注册且只注册一个技能（名字合法、`source: bundled`、正文与 `SKILL.md` 去掉 frontmatter 后
-  逐字节相同、资源基目录可解析），且没有技能注册表时只是空操作、不抛错。
+- **打包自检**：在本仓库内执行 `node scripts/verify-package.mjs`（除 Node 本身无任何依赖），
+  逐项核对 —— `SKILL.md` 与 `dist/*.zip` 命中冻结指纹；`package.json` 声明 `dsh.bundle.patch`，
+  补丁文件是约定形状（`insert.name` 等于包名、不是相对路径）；`files[]` 里每个路径都存在；
+  `lib/index.mjs` 注册且只注册一个技能（名字合法、`source: bundled`、正文与 `SKILL.md` 去掉
+  frontmatter 后逐字节相同、资源基目录就是包根），且没有技能注册表时只是空操作、不抛错。
+- **宿主侧实测（2026-10-17）**：把 DSH 自带实现中的 `@deepseek-ai/dsh-skill` 真实 `SkillRegistry`
+  挂到真实 cordis 组合上，再按 bundle 的装载方式挂本插件 —— **14/14 通过**：技能出现在宿主目录、
+  按名可加载、正文与 `SKILL.md` 正文一致、`provider: runtime`、渲染出
+  `<skill_content name="local-solution-first">`，同名重复注册只是空操作、不会顶掉已生效的那个。
 - **构建可复现**：在 clone 里重跑 `node scripts/build-skill-content.mjs`，`git status` 干净。
 
 ## 许可证
