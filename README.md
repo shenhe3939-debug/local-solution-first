@@ -41,7 +41,11 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 ```
 
 也可以直接用随仓库附带的冻结发行包 `dist/local-solution-first-dsh-v0.1.6.zip`
-（解压后是 `local-solution-first/` 目录，放进任一 skill 根目录即可）。
+（解压后是 `local-solution-first/` 目录，放进任一 skill 根目录即可）：
+
+- 发行页：https://github.com/shenhe3939-debug/local-solution-first/releases/tag/v0.1.6
+- 直链（钉在 tag 上，内容不随 `main` 变动）：
+  https://raw.githubusercontent.com/shenhe3939-debug/local-solution-first/v0.1.6/dist/local-solution-first-dsh-v0.1.6.zip
 
 ## 仓库内容
 
@@ -55,6 +59,7 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 | `tests/regression-cases.md` | 13 个用例 LS-01 … LS-13 |
 | `tests/regression-run-*.md` | 历次回归记录（run #1 … run #9，2026-10-16） |
 | `CHANGELOG.md` | 版本沿革与冻结策略 |
+| `LICENSE` | MIT 许可证 |
 | `dist/local-solution-first-dsh-v0.1.6.zip` | v0.1.6 冻结发行包 |
 
 ## 版本与验证状态（as-of 记录）
@@ -74,5 +79,6 @@ git clone https://github.com/shenhe3939-debug/local-solution-first.git `
 
 ## 许可证
 
-**尚未声明**（默认保留所有权利）。如需开源请作者补一份 LICENSE；
-本机作者另一个仓库 `dsh-wiztree` 用的是 MIT。
+MIT，全文见仓库根目录的 [`LICENSE`](LICENSE)。
+
+Copyright (c) 2026 shenhe3939-debug
