@@ -1,0 +1,11 @@
+# Keep every published byte identical to the frozen package.
+#
+# Without this, a clone on any machine whose git has core.autocrlf=true (the
+# Git-for-Windows default) rewrites text files to CRLF on checkout: SKILL.md
+# then hashes to 85add11f… instead of the frozen F6E1E404…, and a
+# directory-discovered copy of the skill is no longer byte-identical to the
+# packaged one. Pin LF in the repository and on every checkout.
+* text=auto eol=lf
+
+# The release archive is a frozen binary artifact; never touch its bytes.
+*.zip binary
